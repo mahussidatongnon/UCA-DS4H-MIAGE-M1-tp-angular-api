@@ -5,6 +5,9 @@ let assignment = require('./routes/assignments');
 
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
+const requireAuth = require('./middleware/requireAuth');
+const isRequiredAuthAdmin = require('./middleware/isRequiredAuthAdmin');
+
 //mongoose.set('debug', true);
 
 // remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud s
@@ -43,17 +46,28 @@ let port = process.env.PORT || 8010;
 // les routes
 const prefix = '/api';
 
+// Assignments routes
 app.route(prefix + '/assignments')
   .get(assignment.getAssignments);
 
 app.route(prefix + '/assignments/:id')
-  .get(assignment.getAssignment)
-  .delete(assignment.deleteAssignment);
+  .get(isRequiredAuthAdmin, assignment.getAssignment)
+  .delete(isRequiredAuthAdmin, assignment.deleteAssignment);
 
 
 app.route(prefix + '/assignments')
-  .post(assignment.postAssignment)
-  .put(assignment.updateAssignment);
+  .post(isRequiredAuthAdmin, assignment.postAssignment)
+  .put(isRequiredAuthAdmin, assignment.updateAssignment);
+
+// Users routes
+var UserController = require('./routes/user');
+// app.use( prefix + '/users', UserController);
+app.use( prefix + '/users', isRequiredAuthAdmin, UserController);
+
+
+// Authentification
+var AuthController = require('./auth/AuthController');
+app.use( prefix + '/auth', AuthController);
 
 // On démarre le serveur
 app.listen(port, "0.0.0.0");
