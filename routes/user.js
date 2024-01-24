@@ -13,7 +13,7 @@ router.post('/', function (req, res) {
 
     User.create({
             name : req.body.name,
-            email : req.body.email,
+            // email : req.body.email,
             role : req.body.role,
             password : hashedPassword
         }, 
