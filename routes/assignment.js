@@ -1,21 +1,27 @@
 let Assignment = require('../model/assignment');
 
 // Récupérer tous les assignments (GET)
-function getAssignments(req, res){
-    let aggregateQuery = Assignment.aggregate();
-    Assignment.aggregatePaginate(
-        aggregateQuery,
-        {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10,
-        },
-        (err, assignments) => {
-            if (err) {
-                res.send(err);
-            }
-            res.send(assignments);
-        }
-    )
+async function getAssignments(req, res){
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    try {
+        const options = {
+            page: page,
+            limit: limit
+        };
+
+        const result = await Assignment.aggregatePaginate([], options); // Utilisez aggregatePaginate avec les options
+
+        // Utilisez populate pour charger les informations des étudiants et des matières associées
+        await Assignment.populate(result.docs, { path: 'studentId' });
+        await Assignment.populate(result.docs, { path: 'subjectId' });
+
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error finding assignments:", error);
+        res.status(500).send("There was a problem finding the assignments.");
+    }
 }
 
 // Récupérer un assignment par son id (GET)

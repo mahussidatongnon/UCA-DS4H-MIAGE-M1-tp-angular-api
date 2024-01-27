@@ -1,7 +1,7 @@
 let express = require('express');
 let app = express();
 let bodyParser = require('body-parser');
-let assignment = require('./routes/assignments');
+let assignment = require('./routes/assignment');
 
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -62,12 +62,31 @@ app.route(prefix + '/assignments')
 // Users routes
 var UserController = require('./routes/user');
 // app.use( prefix + '/users', UserController);
-app.use( prefix + '/users', isRequiredAuthAdmin, UserController);
+app.use( prefix + '/users', UserController);
 
 
 // Authentification
 var AuthController = require('./auth/AuthController');
 app.use( prefix + '/auth', AuthController);
+
+// Professors routes
+var ProfessorController = require('./routes/professor');
+app.use( prefix + '/professors', ProfessorController);
+
+// Students routes
+var StudentController = require('./routes/student');
+app.use( prefix + '/students', StudentController);
+
+// Subjects routes
+var SubjectController = require('./routes/subject');
+app.use( prefix + '/subjects', SubjectController);
+
+
+// let {migrateAll} = require('./migrations/index');
+// app.get(prefix + '/migrate', function(req, res) {
+//   migrateAll();
+//   res.send('Migration lancée');
+// });
 
 // On démarre le serveur
 app.listen(port, "0.0.0.0");

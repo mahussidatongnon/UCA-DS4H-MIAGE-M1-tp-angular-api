@@ -24,11 +24,27 @@ router.post('/', function (req, res) {
 });
 
 // RETURNS ALL THE USERS IN THE DATABASE
-router.get('/', function (req, res) {
-    User.find({}, { password: 0 }, function (err, users) {
-        if (err) return res.status(500).send("There was a problem finding the users.");
-        res.status(200).send(users);
-    });
+router.get('/', async function (req, res) {
+    // User.find({}, { password: 0 }, function (err, users) {
+    //     if (err) return res.status(500).send("There was a problem finding the users.");
+    //     res.status(200).send(users);
+    // });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    try {
+        const options = {
+            page: page,
+            limit: limit
+        };
+
+        const result = await User.aggregatePaginate([], options); // Utilisez aggregatePaginate avec les options
+
+        res.status(200).send(result);
+    } catch (error) {
+        console.error("Error finding assignments:", error);
+        res.status(500).send("There was a problem finding the assignments." + error);
+    }
 });
 
 // GETS A SINGLE USER FROM THE DATABASE
