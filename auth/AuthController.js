@@ -74,7 +74,7 @@ router.get('/me', requireAuth, function(req, res) {
 router.post('/login', function(req, res) {
     let username = req.body.username;
     let password = req.body.password;
-    User.findOne({name : username}, function (err, user) {
+    User.findOne({login : username}, function (err, user) {
         if (err) return res.status(500).send({ auth: false, token: null, message: 'Error on the server.'});
         if (!user) return res.status(404).send({auth: false, token: null, message: 'No user found.'});
         
