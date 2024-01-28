@@ -1,3 +1,4 @@
+let mongoose = require('mongoose');
 let Assignment = require('../model/assignment');
 
 // Récupérer tous les assignments (GET)
@@ -5,13 +6,40 @@ async function getAssignments(req, res){
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
+    // Filtres
+    let matchQuery = []
+
+    if (req.query.rendu) {
+        matchQuery.push({$match: { rendu: req.query.rendu==="true" }});
+    }
+
+    if (req.query.nom) {
+        matchQuery.push({
+            $match: {
+                nom: { $regex: new RegExp(req.query.nom, 'i') }
+            }
+        });
+    }
+
+    if (req.query.subjectId) {
+        const subjectId = mongoose.Types.ObjectId(req.query.subjectId);
+        matchQuery.push({ $match: { subjectId: subjectId } });
+    }
+
+    if (req.query.studentId) {
+        const studentId = mongoose.Types.ObjectId(req.query.studentId);
+        matchQuery.push({ $match: { studentId: studentId } });
+    }
+
+    console.log("matchQuery", matchQuery);
     try {
         const options = {
             page: page,
             limit: limit
         };
-
-        const result = await Assignment.aggregatePaginate([], options); // Utilisez aggregatePaginate avec les options
+        
+        let aggregateQuery = Assignment.aggregate(matchQuery);
+        const result = await Assignment.aggregatePaginate(aggregateQuery, options);
 
         // Utilisez populate pour charger les informations des étudiants et des matières associées
         await Assignment.populate(result.docs, { path: 'studentId' });
